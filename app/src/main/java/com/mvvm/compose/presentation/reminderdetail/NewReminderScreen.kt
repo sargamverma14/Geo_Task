@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
@@ -15,13 +17,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mvvm.compose.ui.theme.NewComposeWithMVVMTheme
 import kotlinx.coroutines.flow.collectLatest
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewReminderScreen(
     onNavigateBack: () -> Unit,
@@ -31,6 +39,9 @@ fun NewReminderScreen(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = true) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
@@ -38,6 +49,30 @@ fun NewReminderScreen(
                 is NewReminderEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
+    }
+
+    if (showStartTimePicker) {
+        TimePickerDialog(
+            title = "Select Start Time",
+            initialTime = state.startTime,
+            onDismiss = { showStartTimePicker = false },
+            onConfirm = { time ->
+                viewModel.onEvent(NewReminderEvent.UpdateStartTime(time))
+                showStartTimePicker = false
+            }
+        )
+    }
+
+    if (showEndTimePicker) {
+        TimePickerDialog(
+            title = "Select End Time",
+            initialTime = state.endTime,
+            onDismiss = { showEndTimePicker = false },
+            onConfirm = { time ->
+                viewModel.onEvent(NewReminderEvent.UpdateEndTime(time))
+                showEndTimePicker = false
+            }
+        )
     }
 
     Scaffold(
@@ -120,6 +155,8 @@ fun NewReminderScreen(
                             onValueChange = { viewModel.onEvent(NewReminderEvent.UpdateTitle(it)) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
+                            placeholder = { Text("e.g. Buy milk", color = Color.Gray) },
+                            singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
@@ -138,11 +175,11 @@ fun NewReminderScreen(
                         OutlinedTextField(
                             value = state.note,
                             onValueChange = { viewModel.onEvent(NewReminderEvent.UpdateNote(it)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(90.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            maxLines = 3,
+                            placeholder = { Text("Add details...", color = Color.Gray) },
+                            minLines = 2,
+                            maxLines = 5,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
@@ -352,50 +389,22 @@ fun NewReminderScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Start time",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
+                            Box(modifier = Modifier.weight(1f)) {
+                                TimeInputField(
+                                    label = "Start time",
+                                    time = state.startTime,
+                                    onTimeChange = { viewModel.onEvent(NewReminderEvent.UpdateStartTime(it)) },
+                                    onClockClick = { showStartTimePicker = true }
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFFF1F5F2),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(12.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = state.startTime, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                        Icon(imageVector = Icons.Default.Notifications, contentDescription = "Time", tint = Color.Gray, modifier = Modifier.size(18.dp))
-                                    }
-                                }
                             }
 
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "End time",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
+                            Box(modifier = Modifier.weight(1f)) {
+                                TimeInputField(
+                                    label = "End time",
+                                    time = state.endTime,
+                                    onTimeChange = { viewModel.onEvent(NewReminderEvent.UpdateEndTime(it)) },
+                                    onClockClick = { showEndTimePicker = true }
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFFF1F5F2),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(12.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = state.endTime, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                                        Icon(imageVector = Icons.Default.Notifications, contentDescription = "Time", tint = Color.Gray, modifier = Modifier.size(18.dp))
-                                    }
-                                }
                             }
                         }
                     }
@@ -435,5 +444,170 @@ fun NewReminderScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TimeInputField(
+    label: String,
+    time: String,
+    onTimeChange: (String) -> Unit,
+    onClockClick: () -> Unit
+) {
+    val parts = time.split(":")
+    var hour by remember(time) { mutableStateOf(parts.getOrNull(0) ?: "--") }
+    var minute by remember(time) { mutableStateOf(parts.getOrNull(1) ?: "00") }
+
+    var isHourFocused by remember { mutableStateOf(false) }
+    var isMinuteFocused by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = Color.Gray
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFFF1F5F2),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(1.dp)
+                ) {
+                    // Hour field
+                    BasicTextField(
+                        value = hour,
+                        onValueChange = { newVal: String ->
+                            val filtered = newVal.filter { it.isDigit() }.take(2).toString()
+                            hour = filtered.ifEmpty { "--" }
+                            onTimeChange("$hour:$minute")
+                        },
+                        modifier = Modifier
+                            .background(
+                                color = if (isHourFocused) Color(0xFF0079D3) else Color.Transparent,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                            .onFocusChanged { isHourFocused = it.isFocused },
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (isHourFocused) Color.White else Color(0xFF1A1C1A)
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Text(
+                        text = ":",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1C1A)
+                    )
+
+                    // Minute field
+                    BasicTextField(
+                        value = minute,
+                        onValueChange = { newVal: String ->
+                            val filtered = newVal.filter { it.isDigit() }.take(2).toString()
+                            minute = filtered.ifEmpty { "00" }
+                            onTimeChange("$hour:$minute")
+                        },
+                        modifier = Modifier
+                            .background(
+                                color = if (isMinuteFocused) Color(0xFF0079D3) else Color.Transparent,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                            .onFocusChanged { isMinuteFocused = it.isFocused },
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (isMinuteFocused) Color.White else Color(0xFF1A1C1A)
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+
+                IconButton(onClick = onClockClick, modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Select Time",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    title: String,
+    initialTime: String = "08:00",
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val parts = initialTime.split(":")
+    val initHour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+    val initMinute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = initHour,
+        initialMinute = initMinute,
+        is24Hour = true
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val formatted = String.format(Locale.getDefault(), "%02d:%02d", timePickerState.hour, timePickerState.minute)
+                    onConfirm(formatted)
+                }
+            ) {
+                Text("OK", color = Color(0xFF006A4E), fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color.Gray)
+            }
+        },
+        text = {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                TimePicker(state = timePickerState)
+            }
+        },
+        title = {
+            Text(text = title, fontWeight = FontWeight.Bold)
+        },
+        shape = RoundedCornerShape(24.dp),
+        containerColor = Color.White
+    )
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun NewReminderScreenPreview() {
+    NewComposeWithMVVMTheme {
+        NewReminderScreen(onNavigateBack = {}, onNavigateToMapPicker = {})
     }
 }

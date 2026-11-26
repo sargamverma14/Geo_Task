@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "437212110531",
+    "project_id": "geo-task-a0417",
+    "storage_bucket": "geo-task-a0417.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437212110531:android:46eb976b1e2d1e7f978c76",
+        "android_client_info": {
+          "package_name": "com.mvvm.compose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "437212110531-rd4aal0kq1q5thtjt4qtquabpcc9o4j5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mvvm.compose",
+            "certificate_hash": "0028dff137b14c7985903771bf1b868e202091bf"
+          }
+        },
+        {
+          "client_id": "437212110531-4kjbg26pkgd777ccki7cep962ogl25p4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnsJBfWPT2GQrsOokwrtcGzQshGzUNm2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "437212110531-4kjbg26pkgd777ccki7cep962ogl25p4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

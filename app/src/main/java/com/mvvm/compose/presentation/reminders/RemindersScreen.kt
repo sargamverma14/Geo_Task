@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -21,16 +20,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mvvm.compose.domain.model.Reminder
+import com.mvvm.compose.ui.theme.NewComposeWithMVVMTheme
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun RemindersScreen(
     onNavigateToNewReminder: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToMap: () -> Unit,
+    onEditReminder: (Reminder) -> Unit,
     viewModel: RemindersViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -43,7 +46,7 @@ fun RemindersScreen(
                     snackbarHostState.showSnackbar(effect.message)
                 }
                 is RemindersEffect.NavigateToMap -> {
-                    // Navigate to map
+                    onNavigateToMap()
                 }
                 is RemindersEffect.NavigateToSettings -> {
                     onNavigateToSettings()
@@ -65,25 +68,18 @@ fun RemindersScreen(
         containerColor = Color(0xFFF8F9F8),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    onNavigateToNewReminder()
-                },
-                containerColor = Color(0xFFD9531E),
+                onClick = { onNavigateToNewReminder() },
+                containerColor = Color(0xFF006A4E),
                 contentColor = Color.White,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.size(56.dp)
+                shape = CircleShape
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Reminder",
-                    modifier = Modifier.size(28.dp)
-                )
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Reminder")
             }
         },
         bottomBar = {
             Surface(
                 color = Color.White,
-                tonalElevation = 8.dp,
+                shadowElevation = 8.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -98,26 +94,26 @@ fun RemindersScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable { }
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFFC2E7E0))
-                                .padding(horizontal = 20.dp, vertical = 4.dp),
-                            contentAlignment = Alignment.Center
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFC2E7E0),
+                            modifier = Modifier.size(width = 56.dp, height = 32.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Reminders",
-                                tint = Color(0xFF005C42),
-                                modifier = Modifier.size(24.dp)
-                            )
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Reminders",
+                                    tint = Color(0xFF00382B),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Reminders",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF005C42)
+                            color = Color(0xFF00382B)
                         )
                     }
 
@@ -128,17 +124,23 @@ fun RemindersScreen(
                             viewModel.onEvent(RemindersEvent.NavigateToMap)
                         }
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Place,
-                            contentDescription = "Map",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier.size(width = 56.dp, height = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Map",
+                                tint = Color(0xFF414943),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Map",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF414943)
                         )
                     }
 
@@ -149,17 +151,23 @@ fun RemindersScreen(
                             viewModel.onEvent(RemindersEvent.NavigateToSettings)
                         }
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier.size(width = 56.dp, height = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = Color(0xFF414943),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Settings",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF414943)
                         )
                     }
                 }
@@ -170,7 +178,8 @@ fun RemindersScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Top Bar
             Row(
@@ -178,54 +187,33 @@ fun RemindersScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF006A4E)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Text(
-                        text = "My Reminders",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1C1A)
-                    )
-                }
+                Text(
+                    text = "My Reminders",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1C1A)
+                )
 
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFE8F5E9),
-                    modifier = Modifier.size(44.dp)
+                    color = Color(0xFFF1F5F2),
+                    modifier = Modifier.size(40.dp)
                 ) {
                     IconButton(onClick = { viewModel.onEvent(RemindersEvent.NavigateToSettings) }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = Color(0xFF1A1C1A),
+                            tint = Color(0xFF414943),
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Filter Chips Row
+            // Filter Chips
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterChipItem(
                     text = "All",
@@ -244,88 +232,49 @@ fun RemindersScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            // Reminders List or Empty State
             if (state.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = Color(0xFF006A4E))
                 }
             } else if (filteredReminders.isEmpty()) {
-                // Empty State matching Screen 2
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color(0xFFF1F5F2),
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                            .height(200.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFFE2F3EF),
+                            modifier = Modifier.size(72.dp)
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFFC2E7E0)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.LocationOn,
-                                        contentDescription = "Map Pin",
-                                        tint = Color(0xFF005C42),
-                                        modifier = Modifier.size(36.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = "🗺️ Interactive Map View",
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF005C42),
-                                    fontWeight = FontWeight.Medium
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = "Map Pin",
+                                    tint = Color(0xFF005C42),
+                                    modifier = Modifier.size(36.dp)
                                 )
                             }
                         }
+                        Text(
+                            text = "No reminders yet.\nAdd your first one.",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF747874),
+                            textAlign = TextAlign.Center
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "No reminders yet.\nAdd your first one.",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1C1A),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Pick a place on the map and get notified when you arrive or leave.",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 32.dp)
-                    )
                 }
             } else {
-                // Reminders List matching Screen 1
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -334,6 +283,9 @@ fun RemindersScreen(
                             reminder = reminder,
                             onToggle = { isActive ->
                                 viewModel.onEvent(RemindersEvent.ToggleReminder(reminder.id, isActive))
+                            },
+                            onEdit = {
+                                onEditReminder(reminder)
                             }
                         )
                     }
@@ -375,14 +327,17 @@ fun FilterChipItem(
 @Composable
 fun ReminderCard(
     reminder: Reminder,
-    onToggle: (Boolean) -> Unit
+    onToggle: (Boolean) -> Unit,
+    onEdit: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = Color.White,
         tonalElevation = 1.dp,
         shadowElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onEdit)
     ) {
         Row(
             modifier = Modifier
@@ -471,5 +426,13 @@ fun ReminderCard(
                 )
             )
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun RemindersScreenPreview() {
+    NewComposeWithMVVMTheme {
+        RemindersScreen(onNavigateToNewReminder = {}, onNavigateToSettings = {}, onNavigateToMap = {}, onEditReminder = {})
     }
 }

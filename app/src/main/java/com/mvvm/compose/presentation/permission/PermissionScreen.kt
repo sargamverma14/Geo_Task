@@ -1,5 +1,6 @@
 package com.mvvm.compose.presentation.permission
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,12 +16,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.mvvm.compose.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mvvm.compose.ui.theme.NewComposeWithMVVMTheme
 import kotlinx.coroutines.flow.collectLatest
+
+data class PermissionStepInfo(
+    val title: String,
+    val subtitle: String,
+    val badgeIcon: ImageVector,
+    val imageRes: Int
+)
 
 @Composable
 fun PermissionScreen(
@@ -38,6 +51,27 @@ fun PermissionScreen(
                 is PermissionEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
+    }
+
+    val stepInfo = when (state.currentStep) {
+        1 -> PermissionStepInfo(
+            "Location access",
+            "We need your location to know when you reach a place",
+            Icons.Default.LocationOn,
+            R.drawable.permission
+        )
+        2 -> PermissionStepInfo(
+            "Allow all the time",
+            "So reminders work even when the app is closed",
+            Icons.Default.LocationOn,
+            R.drawable.permision2
+        )
+        else -> PermissionStepInfo(
+            "Notifications",
+            "So we can alert you at the right place",
+            Icons.Default.Notifications,
+            R.drawable.permission3
+        )
     }
 
     Scaffold(
@@ -63,25 +97,16 @@ fun PermissionScreen(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(20.dp)
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(Color(0xFF006A4E))
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFD0D5DD))
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFD0D5DD))
-                    )
+                    for (i in 1..3) {
+                        val isActive = state.currentStep == i
+                        Box(
+                            modifier = Modifier
+                                .width(if (isActive) 20.dp else 6.dp)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(if (isActive) Color(0xFF006A4E) else Color(0xFFD0D5DD))
+                        )
+                    }
                 }
 
                 Surface(
@@ -91,7 +116,7 @@ fun PermissionScreen(
                 ) {
                     IconButton(onClick = { viewModel.onEvent(PermissionEvent.ToggleDarkMode) }) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            painterResource(R.drawable.outline_nightlight_24),
                             contentDescription = "Settings / Mode",
                             tint = Color(0xFF1A1C1A),
                             modifier = Modifier.size(20.dp)
@@ -116,52 +141,20 @@ fun PermissionScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Illustration Box
-                    Box(
+                    // Permission Illustration Image
+                    Image(
+                        painter = painterResource(id = stepInfo.imageRes),
+                        contentDescription = "Permission Illustration",
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color(0xFFEAF5F2)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(72.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFFC2E7E0)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Phone,
-                                    contentDescription = "Device",
-                                    tint = Color(0xFF005C42),
-                                    modifier = Modifier.size(38.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFFFF9800)
-                            ) {
-                                Text(
-                                    text = "⚠️ Location Alert",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                )
-                            }
-                        }
-                    }
+                            .clip(RoundedCornerShape(20.dp)),
+                        contentScale = ContentScale.Crop
+                    )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Location Icon Badge
+                    // Icon Badge
                     Box(
                         modifier = Modifier
                             .size(52.dp)
@@ -170,8 +163,8 @@ fun PermissionScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location Pin",
+                            imageVector = stepInfo.badgeIcon,
+                            contentDescription = "Permission Icon",
                             tint = Color(0xFF005C42),
                             modifier = Modifier.size(28.dp)
                         )
@@ -181,7 +174,7 @@ fun PermissionScreen(
 
                     // Title
                     Text(
-                        text = "Location access",
+                        text = stepInfo.title,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1A1C1A),
@@ -192,7 +185,7 @@ fun PermissionScreen(
 
                     // Subtitle
                     Text(
-                        text = "We need your location to know when you reach a place",
+                        text = stepInfo.subtitle,
                         fontSize = 14.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
@@ -245,5 +238,13 @@ fun PermissionScreen(
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun PermissionScreenPreview() {
+    NewComposeWithMVVMTheme {
+        PermissionScreen(onNavigateNext = {})
     }
 }

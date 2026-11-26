@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mvvm.compose.ui.theme.NewComposeWithMVVMTheme
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -375,5 +377,13 @@ fun MapPickerScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Composable
+fun MapPickerScreenPreview() {
+    NewComposeWithMVVMTheme {
+        MapPickerScreen(onNavigateBack = {}, onNavigateNext = {})
     }
 }

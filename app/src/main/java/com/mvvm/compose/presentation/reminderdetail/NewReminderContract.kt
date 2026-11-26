@@ -3,8 +3,9 @@ package com.mvvm.compose.presentation.reminderdetail
 import com.mvvm.compose.domain.model.Reminder
 
 data class NewReminderState(
-    val title: String = "Buy milk",
-    val note: String = "2% organic milk and sourdough loaf",
+    val id: Int = 0,
+    val title: String = "",
+    val note: String = "",
     val locationName: String = "City Market",
     val radius: String = "300 m radius",
     val triggerType: String = "Arrive", // "Arrive" or "Leave"

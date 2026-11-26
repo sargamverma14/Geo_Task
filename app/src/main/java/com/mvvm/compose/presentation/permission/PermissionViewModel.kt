@@ -10,11 +10,13 @@ class PermissionViewModel @Inject constructor() :
 
     override fun onEvent(event: PermissionEvent) {
         when (event) {
-            is PermissionEvent.AllowPermission -> {
-                sendEffect(PermissionEffect.NavigateNext)
-            }
+            is PermissionEvent.AllowPermission,
             is PermissionEvent.SkipPermission -> {
-                sendEffect(PermissionEffect.NavigateNext)
+                if (uiState.value.currentStep < uiState.value.totalSteps) {
+                    setState { copy(currentStep = currentStep + 1) }
+                } else {
+                    sendEffect(PermissionEffect.NavigateNext)
+                }
             }
             is PermissionEvent.ToggleDarkMode -> {
                 setState { copy(isDarkMode = !isDarkMode) }

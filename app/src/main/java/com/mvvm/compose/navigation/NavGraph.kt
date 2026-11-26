@@ -11,6 +11,8 @@ import com.mvvm.compose.presentation.permission.PermissionScreen
 import com.mvvm.compose.presentation.reminderdetail.NewReminderScreen
 import com.mvvm.compose.presentation.reminders.RemindersScreen
 import com.mvvm.compose.presentation.settings.SettingsScreen
+import com.mvvm.compose.presentation.signin.SignInScreen
+import com.mvvm.compose.presentation.splash.SplashScreen
 
 @Composable
 fun SetupNavGraph(
@@ -19,9 +21,32 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Permission.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
+        composable(route = Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToSignIn = {
+                    navController.navigate(Screen.SignIn.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(route = Screen.SignIn.route) {
+            SignInScreen(
+                onNavigateNext = {
+                    navController.navigate(Screen.Permission.route) {
+                        popUpTo(Screen.SignIn.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(route = Screen.Permission.route) {
             PermissionScreen(
                 onNavigateNext = {
@@ -34,10 +59,18 @@ fun SetupNavGraph(
         composable(route = Screen.Home.route) {
             RemindersScreen(
                 onNavigateToNewReminder = {
-                    navController.navigate(Screen.NewReminder.route)
+                    navController.navigate(Screen.NewReminder.createRoute(0))
+                },
+                onEditReminder = { reminder ->
+                    navController.navigate(Screen.NewReminder.createRoute(reminder.id))
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMap = {
+                    navController.navigate(Screen.MapPicker.route) {
                         launchSingleTop = true
                     }
                 }
